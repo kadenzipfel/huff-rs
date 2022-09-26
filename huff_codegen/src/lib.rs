@@ -370,26 +370,50 @@ impl Codegen {
                         // unmatched jumps and define its `bytecode_index`
                         // at `code_index`
                         if let Some(jump_index) = label_indices.get(jump.label.as_str()) {
-                            // Format the jump index as a 2 byte hex number
-                            let jump_value = format!("{:04x}", jump_index);
+                            // Check if jump index can fit in a single byte
+                            if jump_index <= &255 {
+                                // Format the jump index as a 2 byte hex number
+                                let jump_value = format!("{:04x}", jump_index);
 
-                            // Get the bytes before & after the placeholder
-                            let before = &formatted_bytes.0[0..jump.bytecode_index + 2];
-                            let after = &formatted_bytes.0[jump.bytecode_index + 6..];
+                                // Get the bytes before & after the placeholder
+                                let before = &formatted_bytes.0[0..jump.bytecode_index + 2];
+                                let after = &formatted_bytes.0[jump.bytecode_index + 6..];
 
-                            // Check if a jump dest placeholder is present
-                            if !&formatted_bytes.0[jump.bytecode_index + 2..jump.bytecode_index + 6]
-                                .eq("xxxx")
-                            {
-                                tracing::error!(
-                                    target: "codegen",
-                                    "JUMP DESTINATION PLACEHOLDER NOT FOUND FOR JUMPLABEL {}",
-                                    jump.label
-                                );
+                                // Check if a jump dest placeholder is present
+                                if !&formatted_bytes.0[jump.bytecode_index + 2..jump.bytecode_index + 6]
+                                    .eq("xxxx")
+                                {
+                                    tracing::error!(
+                                        target: "codegen",
+                                        "JUMP DESTINATION PLACEHOLDER NOT FOUND FOR JUMPLABEL {}",
+                                        jump.label
+                                    );
+                                }
+
+                                // Replace the "xxxx" placeholder with the jump value
+                                formatted_bytes = Bytes(format!("{}{}{}", before, jump_value, after));
+                            } else {
+                                // Format the jump index as a 2 byte hex number
+                                let jump_value = format!("{:04x}", jump_index);
+
+                                // Get the bytes before & after the placeholder
+                                let before = &formatted_bytes.0[0..jump.bytecode_index + 2];
+                                let after = &formatted_bytes.0[jump.bytecode_index + 6..];
+
+                                // Check if a jump dest placeholder is present
+                                if !&formatted_bytes.0[jump.bytecode_index + 2..jump.bytecode_index + 6]
+                                    .eq("xxxx")
+                                {
+                                    tracing::error!(
+                                        target: "codegen",
+                                        "JUMP DESTINATION PLACEHOLDER NOT FOUND FOR JUMPLABEL {}",
+                                        jump.label
+                                    );
+                                }
+
+                                // Replace the "xxxx" placeholder with the jump value
+                                formatted_bytes = Bytes(format!("{}{}{}", before, jump_value, after));
                             }
-
-                            // Replace the "xxxx" placeholder with the jump value
-                            formatted_bytes = Bytes(format!("{}{}{}", before, jump_value, after));
                         } else {
                             // The jump did not have a corresponding label index. Add it to the
                             // unmatched jumps vec.
