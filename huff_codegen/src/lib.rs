@@ -390,8 +390,8 @@ impl Codegen {
                                     );
                                 }
 
-                                // Replace the "xxxx" placeholder with the jump value
-                                formatted_bytes = Bytes(format!("{}{}{}", before, jump_value, after));
+                                // Replace "${PUSH2}xxxx" with "${PUSH1}${jump_value}"
+                                formatted_bytes = Bytes(format!("{}{}{}{}", before, Opcode::Push1, jump_value, after));
                             } else {
                                 // Format the jump index as a 2 byte hex number
                                 let jump_value = format!("{:04x}", jump_index);
