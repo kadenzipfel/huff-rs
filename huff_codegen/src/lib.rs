@@ -375,8 +375,8 @@ impl Codegen {
                                 // Format the jump index as a 1 byte hex number
                                 let jump_value = format!("{:02x}", jump_index);
 
-                                // Get the bytes before & after the placeholder
-                                let before = &formatted_bytes.0[0..jump.bytecode_index + 2];
+                                // Get the bytes before & after the placeholder, excluding PUSH2
+                                let before = &formatted_bytes.0[0..jump.bytecode_index + 1];
                                 let after = &formatted_bytes.0[jump.bytecode_index + 6..];
 
                                 // Check if a jump dest placeholder is present
