@@ -372,8 +372,8 @@ impl Codegen {
                         if let Some(jump_index) = label_indices.get(jump.label.as_str()) {
                             // Check if jump index can fit in a single byte
                             if jump_index <= &255 {
-                                // Format the jump index as a 2 byte hex number
-                                let jump_value = format!("{:04x}", jump_index);
+                                // Format the jump index as a 1 byte hex number
+                                let jump_value = format!("{:02x}", jump_index);
 
                                 // Get the bytes before & after the placeholder
                                 let before = &formatted_bytes.0[0..jump.bytecode_index + 2];
